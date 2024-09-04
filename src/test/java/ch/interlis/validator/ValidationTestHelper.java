@@ -14,12 +14,14 @@ import ch.interlis.iox_j.logging.LogEventFactory;
 import ch.interlis.iox_j.utility.ReaderFactory;
 import ch.interlis.iox_j.validator.InterlisFunction;
 import ch.interlis.iox_j.validator.ValidationConfig;
-import ch.interlis.iox_j.validator.Validator;
+//import ch.interlis.iox_j.validator.Validator;
+import org.interlis2.validator.Validator;
 
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 public class ValidationTestHelper {
     private final HashMap<String, Class<InterlisFunction>> userFunctions = new HashMap<>();
@@ -28,22 +30,35 @@ public class ValidationTestHelper {
     public void runValidation(String[] dataFiles, String[] modelFiles) throws IoxException, Ili2cFailure {
         dataFiles = addLeadingTestDataDirectory(dataFiles);
         modelFiles = addLeadingTestDataDirectory(modelFiles);
-        modelFiles = appendGeoWFunctionsExtIli(modelFiles);
+//        modelFiles = appendGeoWFunctionsExtIli(modelFiles);
 
         logCollector = new LogCollector();
         LogEventFactory errFactory = new LogEventFactory();
         errFactory.setLogger(logCollector);
 
         Settings settings = new Settings();
+        settings.setValue(Validator.SETTING_CONFIGFILE, "src/test/data/models/DMAV_V1_0_Validierung.ini");
         //settings.setTransientObject(ch.interlis.iox_j.validator.Validator.CONFIG_CUSTOM_FUNCTIONS, userFunctions);
 
-        TransferDescription td = ch.interlis.ili2c.Ili2c.compileIliFiles(new ArrayList<>(Arrays.asList(modelFiles)), new ArrayList<String>());
-
+        //TransferDescription td = ch.interlis.ili2c.Ili2c.compileIliFiles(new ArrayList<>(Arrays.asList(modelFiles)), new ArrayList<String>());
+        
+        ArrayList<String> models = new ArrayList<String>() {{
+            add("DMAVTYM_Alles_V1_0"); 
+//            add("DMAV_V1_0_Validierung"); 
+        }};
+        ArrayList<String> modeldir = new ArrayList<String>() {{
+            add("src/test/data/models/");
+            add("src/test/data/models/V_D");
+            add("src/test/data/models/CH");
+            add("src/test/data/models/refhb24");
+        }};
+        TransferDescription td = ch.interlis.ili2c.Ili2c.compileIliModels(models, modeldir);
+        
         ValidationConfig modelConfig = new ValidationConfig();
         modelConfig.mergeIliMetaAttrs(td);
 
         PipelinePool pool = new PipelinePool();
-        Validator validator = new ch.interlis.iox_j.validator.Validator(td, modelConfig, logCollector, errFactory, pool, settings);
+        ch.interlis.iox_j.validator.Validator validator = new ch.interlis.iox_j.validator.Validator(td, modelConfig, logCollector, errFactory, pool, settings);
 
         for (String filename : dataFiles) {
             System.out.println("filename: " + filename);

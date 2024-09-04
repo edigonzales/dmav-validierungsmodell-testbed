@@ -18,6 +18,7 @@ import ch.interlis.validator.ValidationTestHelper;
 public class FixpunkteAVKategorie3_LFP3 {
     private static final String TEST_IN = "src/test/data/";
     private static final String LOGFILE_NAME = "ilivalidator.log";
+    private static final String XTF_LOGFILE_NAME = "ilivalidator.log.xtf";
 
     // Nachteil: Mit der high level api kann ich schlecht herausfinden, wie viele Fehler gefunden wurden (?)
     
@@ -32,20 +33,26 @@ public class FixpunkteAVKategorie3_LFP3 {
     @Test
     public void CH031151(@TempDir Path tempDir) throws Exception {
 
-        vh.runValidation(new String[]{TEST_IN+"FixpunkteAVKategorie3_LFP3/CH031151.xtf"}, new String[]{});
+//        vh.runValidation(new String[]{"FixpunkteAVKategorie3/CH031151.xtf"}, new String[]{});
+//        
+//        System.out.println(vh.getErrs().size());
+//        System.out.println(vh.getErrs().get(0));
 
         
-//        String logFileName = Paths.get(tempDir.toFile().getAbsolutePath(), LOGFILE_NAME).toFile().getAbsolutePath();
-//        
-//        Settings settings = new Settings();
+        String logFileName = Paths.get(tempDir.toFile().getAbsolutePath(), LOGFILE_NAME).toFile().getAbsolutePath();
+        String xtfLogFileName = Paths.get(tempDir.toFile().getAbsolutePath(), XTF_LOGFILE_NAME).toFile().getAbsolutePath();
+        
+        Settings settings = new Settings();
 //        settings.setValue(Validator.SETTING_LOGFILE, logFileName);
-//        settings.setValue(Validator.SETTING_ILIDIRS, "https://models.geo.admin.ch;"+TEST_IN+"models/;");
-//        settings.setValue(Validator.SETTING_CONFIGFILE, TEST_IN+"models/DMAV_V1_0_Validierung.ini");
+        settings.setValue(Validator.SETTING_XTFLOG, xtfLogFileName);
+        settings.setValue(Validator.SETTING_ILIDIRS, TEST_IN+"models/;"+TEST_IN+"models/CH;"+TEST_IN+"models/V_D;"+TEST_IN+"models/refhb24");
+        settings.setValue(Validator.SETTING_CONFIGFILE, TEST_IN+"models/DMAV_V1_0_Validierung.ini");
 //        
-//        boolean valid = Validator.runValidation(TEST_IN+"FixpunkteAVKategorie3_LFP3/CH031151.xtf", settings);
-//        assertFalse(valid);
+        boolean valid = Validator.runValidation(TEST_IN+"FixpunkteAVKategorie3/CH031151.xtf", settings);
+        assertFalse(valid);
 //  
-//        String content = new String(Files.readAllBytes(Paths.get(logFileName)));        
+        String content = new String(Files.readAllBytes(Paths.get(xtfLogFileName)));
+        System.out.println(content);
 //        assertTrue(content.contains("Error: line 51: DMAV_FixpunkteAVKategorie3_V1_0.FixpunkteAVKategorie3.LFP3: tid ddfda0fa-c828-4dc9-804c-31b185eebd05: Hoehengometrie darf nicht gleich 0.0 sein"));
     }
 }
