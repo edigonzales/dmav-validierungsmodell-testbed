@@ -90,7 +90,7 @@ public class FixpunkteAVKategorie3_LFP3 {
                     .filter(element -> !expectedLogEvents.contains(element))
                     .collect(Collectors.toList());
 
-            System.out.println("Differenz Soll - Ist: " + differences);
+            System.out.println("Test result does not correspond to the expected result (expected minus test): " + differences);
             
         }
         {
@@ -98,7 +98,7 @@ public class FixpunkteAVKategorie3_LFP3 {
                     .filter(element -> !logEvents.contains(element))
                     .collect(Collectors.toList());
 
-            System.out.println("Differenz Ist - Soll: " + differences);
+            System.out.println("Expected result does not correspond to the test result (test minus expected): " + differences);
             
         }
         
