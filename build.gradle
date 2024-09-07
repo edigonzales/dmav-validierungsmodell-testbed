@@ -4,11 +4,11 @@ plugins {
     id 'war'
 }
 
-sourceCompatibility = 21
-targetCompatibility = 21
+sourceCompatibility = 11
+targetCompatibility = 11
 
 compileJava {
-    options.compilerArgs.addAll(['--release', '21'])
+    options.compilerArgs.addAll(['--release', '11'])
 }
 
 repositories {
@@ -16,20 +16,15 @@ repositories {
     maven { url "https://jars.interlis.ch" }
 }
 
+
+def ilivalidatorVersion = project.hasProperty('ilivalidatorVersion') ? project.ilivalidatorVersion : '1.14.3'
+
 dependencies {
     testImplementation libs.junit.jupiter
-    implementation 'org.slf4j:slf4j-simple:1.7.36'
 
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-    providedCompile 'ch.interlis:ilivalidator:1.14.3'
-
-    implementation 'org.apache.maven.resolver:maven-resolver-api:1.9.22'
-    implementation 'org.apache.maven.resolver:maven-resolver-impl:1.9.22'
-    implementation 'org.apache.maven.resolver:maven-resolver-connector-basic:1.9.22'
-    implementation 'org.apache.maven.resolver:maven-resolver-transport-http:1.9.22'
-    implementation 'org.apache.maven.resolver:maven-resolver-transport-file:1.9.22'
-    implementation 'org.apache.maven:maven-resolver-provider:3.9.9'
+    implementation "ch.interlis:ilivalidator:${ilivalidatorVersion}"
 }
 
 application {

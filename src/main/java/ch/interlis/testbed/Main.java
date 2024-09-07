@@ -10,6 +10,8 @@ public class Main {
         
         Testbed testbed = new Testbed();
         testbed.run();
+        
+//        System.out.println(System.getProperty("java.class.path"));
     }
 
 }

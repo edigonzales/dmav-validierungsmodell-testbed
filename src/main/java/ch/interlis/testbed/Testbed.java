@@ -11,12 +11,12 @@ public class Testbed {
 
     public void run() {
         
-        DynamicDependencyLoader dependencyLoader = new DynamicDependencyLoader();
-        try {
-            dependencyLoader.loadDependency("ch.interlis", "ilivalidator", "1.14.2");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        DynamicDependencyLoader dependencyLoader = new DynamicDependencyLoader();
+//        try {
+//            dependencyLoader.loadDependency("ch.interlis", "ilivalidator", "1.14.2");
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
         
         
       Settings settings = new Settings();
