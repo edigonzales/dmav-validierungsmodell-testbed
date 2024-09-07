@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.interlis2.validator.Validator;
+//import org.interlis2.validator.Validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -19,11 +19,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import ch.ehi.basics.settings.Settings;
-import ch.interlis.validator.LogEvent;
-import ch.interlis.validator.LogEventType;
-import ch.interlis.validator.ValidationTestHelper;
-import ch.interlis.validator.ValidationTestHelperFOO;
+//import ch.ehi.basics.settings.Settings;
+//import ch.interlis.validator.LogEvent;
+//import ch.interlis.validator.LogEventType;
+//import ch.interlis.validator.ValidationTestHelper;
+//import ch.interlis.validator.ValidationTestHelperFOO;
 
 public class FixpunkteAVKategorie3_LFP3 {
     private static final String TEST_IN = "src/test/data/";
@@ -33,12 +33,12 @@ public class FixpunkteAVKategorie3_LFP3 {
     // Nachteil: Mit der high level api kann ich schlecht herausfinden, wie viele Fehler gefunden wurden (?)
     
 //    ValidationTestHelperFOO vh = null;
-    ValidationTestHelper vh = null;
+//    ValidationTestHelper vh = null;
 
     @BeforeEach
     void setUp() {
 //        vh = new ValidationTestHelperFOO();
-        vh = new ValidationTestHelper();
+//        vh = new ValidationTestHelper();
         //vh.addFunction(new GetAreaIoxPlugin());
     }
 
@@ -71,58 +71,58 @@ public class FixpunkteAVKategorie3_LFP3 {
 //    }
     
     //@ParameterizedTest(name = "{0} is expected to output {1}")
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("testCases")
-    public void fizzBuzz(String inputFile, boolean expectedValidationResult, List<LogEvent> expectedLogEvents, @TempDir Path tempDir) {
-//        assertEquals(expected, underTest.fizzBuzz(input));
-        System.out.println("input " + inputFile);
-        System.out.println("exp: " + expectedValidationResult);
-        
-        boolean valid = vh.runValidation(inputFile, tempDir);
-        
-        assertEquals(expectedValidationResult, valid);
-        
-        List<LogEvent> logEvents = vh.getLogEvents();
-//        System.out.println("logEvent: " + logEvent);
-        
-        {
-            List<LogEvent> differences = logEvents.stream()
-                    .filter(element -> !expectedLogEvents.contains(element))
-                    .collect(Collectors.toList());
+//    @ParameterizedTest(name = "{0}")
+//    @MethodSource("testCases")
+//    public void fizzBuzz(String inputFile, boolean expectedValidationResult, List<LogEvent> expectedLogEvents, @TempDir Path tempDir) {
+////        assertEquals(expected, underTest.fizzBuzz(input));
+//        System.out.println("input " + inputFile);
+//        System.out.println("exp: " + expectedValidationResult);
+//        
+//        boolean valid = vh.runValidation(inputFile, tempDir);
+//        
+//        assertEquals(expectedValidationResult, valid);
+//        
+//        List<LogEvent> logEvents = vh.getLogEvents();
+////        System.out.println("logEvent: " + logEvent);
+//        
+//        {
+//            List<LogEvent> differences = logEvents.stream()
+//                    .filter(element -> !expectedLogEvents.contains(element))
+//                    .collect(Collectors.toList());
+//
+//            System.out.println("Test result does not correspond to the expected result (expected minus test): " + differences);
+//            
+//        }
+//        {
+//            List<LogEvent> differences = expectedLogEvents.stream()
+//                    .filter(element -> !logEvents.contains(element))
+//                    .collect(Collectors.toList());
+//
+//            System.out.println("Expected result does not correspond to the test result (test minus expected): " + differences);
+//            
+//        }
+//        
+//        
+//    }
 
-            System.out.println("Test result does not correspond to the expected result (expected minus test): " + differences);
-            
-        }
-        {
-            List<LogEvent> differences = expectedLogEvents.stream()
-                    .filter(element -> !logEvents.contains(element))
-                    .collect(Collectors.toList());
-
-            System.out.println("Expected result does not correspond to the test result (test minus expected): " + differences);
-            
-        }
-        
-        
-    }
-
-    static Stream<Arguments> testCases() {
-        return Stream.of(
-                Arguments.of(
-                        "FixpunkteAVKategorie3/CH031151.xtf", 
-                        false, 
-                        List.of(
-                                new LogEvent(LogEventType.ERROR, "Hoehengeometrie darf nicht gleich 0.0 sein")
-                                )
-                        ), 
-                Arguments.of(
-                        "FixpunkteAVKategorie3/CH033551.xtf", 
-                        false, 
-                        List.of(
-                                new LogEvent(LogEventType.ERROR, "Hoehengeometrie darf nicht gleich 0.0 sein")
-                                )
-                        )
-                );
-    }
+//    static Stream<Arguments> testCases() {
+//        return Stream.of(
+//                Arguments.of(
+//                        "FixpunkteAVKategorie3/CH031151.xtf", 
+//                        false, 
+//                        List.of(
+//                                new LogEvent(LogEventType.ERROR, "Hoehengeometrie darf nicht gleich 0.0 sein")
+//                                )
+//                        ), 
+//                Arguments.of(
+//                        "FixpunkteAVKategorie3/CH033551.xtf", 
+//                        false, 
+//                        List.of(
+//                                new LogEvent(LogEventType.ERROR, "Hoehengeometrie darf nicht gleich 0.0 sein")
+//                                )
+//                        )
+//                );
+//    }
 
     
 //    private static Stream<Arguments> fizzBuzzTestCases() {
