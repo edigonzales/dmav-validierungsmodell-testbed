@@ -18,6 +18,7 @@ repositories {
 
 
 def ilivalidatorVersion = project.hasProperty('ilivalidatorVersion') ? project.ilivalidatorVersion : '1.14.3'
+def dataDirectory = project.hasProperty('data') ? project.data : './src/test/data'
 
 dependencies {
     testImplementation libs.junit.jupiter
@@ -34,3 +35,8 @@ application {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+run {
+    args = ["--data", dataDirectory]
+}
+
