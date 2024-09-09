@@ -1,4 +1,4 @@
-package ch.interlis.validator;
+package ch.interlis.testbed;
 
 public enum LogEventType {
     INFO,

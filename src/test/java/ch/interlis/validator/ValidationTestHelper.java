@@ -7,6 +7,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import ch.interlis.testbed.LogEvent;
+import ch.interlis.testbed.LogEventType;
+
 //import org.interlis2.validator.Validator;
 
 //import ch.ehi.basics.settings.Settings;

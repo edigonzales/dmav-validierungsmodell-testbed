@@ -1,4 +1,4 @@
-package ch.interlis.validator;
+package ch.interlis.testbed;
 
 public class LogEvent {
     private LogEventType type;
@@ -24,5 +24,10 @@ public class LogEvent {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    @Override
+    public String toString() {
+        return "LogEvent [type=" + type + ", message=" + message + "]";
     }
 }

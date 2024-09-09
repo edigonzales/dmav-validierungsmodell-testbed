@@ -1,6 +1,7 @@
 package ch.interlis.testbed;
 
 import ch.ehi.basics.settings.Settings;
+import ch.interlis.iom_j.xtf.XtfReader;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -13,13 +14,25 @@ import java.util.stream.Stream;
 
 import org.interlis2.validator.Validator;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+import javax.xml.parsers.DocumentBuilder;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+import org.w3c.dom.Node;
+import org.w3c.dom.Element;
 
 public class Testbed {
 
     private static final String TEST_IN = "src/main/data/";
     private static final String XTF_LOGFILE_NAME = "ilivalidator.log.xtf";
 
-    public void run(String dataDirectory) {
+    public boolean run(String dataDirectory, String config, String modeldir) {
 
         // Alle XTF-Dateien, die nicht eine expected Log-Datei ist.
         List<Path> transferFiles = new ArrayList<Path>();
@@ -35,26 +48,114 @@ public class Testbed {
                     .collect(Collectors.toList());        
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }
         
         System.out.println(transferFiles);
+        
+        for (Path transferFile : transferFiles) {
+            String transferFileName = transferFile.getFileName().toString().substring(0, transferFile.getFileName().toString().length()-4);
+            
+            String logFileNameExpected = transferFileName + ".log.xtf";
+            Path logFileExpected = transferFile.getParent().resolve(logFileNameExpected);
+            // Falls im gleichen Verzeichnis nicht eine Logdatei (mit den zu erwartenden Resulaten)
+            // liegt, wird das zu prüfende XTF ignoriert.
+            if (Files.notExists(logFileExpected)) {
+                continue;
+            }
+            
+            // XTF validieren
+            try {
+                Path tmpdir = Files.createTempDirectory("testbed_");
+                String logFileNameTest = tmpdir.resolve(transferFileName + ".log.xtf").toFile().getAbsolutePath();
+                
+                Settings settings = new Settings();
+                settings.setValue(Validator.SETTING_XTFLOG, logFileNameTest);
+                
+                // Falls modeldir verwendet wird, muss ilidirs korrekt abgeleitet werden.
+                // Ansonsten wird default-Wert für ilidirs verwendet.
+                if (modeldir != null) {
+                    List<String> directories = Files.walk(Paths.get(modeldir))
+                            .filter(Files::isDirectory)
+                            .map(d -> {return d.toString();})
+                            .collect(Collectors.toList());
 
+                    settings.setValue(Validator.SETTING_ILIDIRS, String.join(";", directories));
+                } else {
+                    settings.setValue(Validator.SETTING_ILIDIRS, Validator.SETTING_DEFAULT_ILIDIRS);
+                }
+                
+                if (config != null) {
+                    settings.setValue(Validator.SETTING_CONFIGFILE, config);                    
+                }
+
+                boolean valid = Validator.runValidation(transferFile.toFile().getAbsolutePath(), settings);
+
+                
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+            
+            System.out.println(logFileExpected);
+            
+            List<LogEvent> logEventsExpected = null;
+            try {
+                logEventsExpected = getLogEvents(logFileExpected);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+
+        
+        return true;
+        
         // Alle gefundenen XTF-Dateien prüfen, die im gleichen Verzeichnis
         // auch eine (expected) Logdatei zum Vergleich liegen haben.
         
                
         
-//      Settings settings = new Settings();
-//      settings.setValue(Validator.SETTING_XTFLOG, XTF_LOGFILE_NAME); // TODO
-//      settings.setValue(Validator.SETTING_ILIDIRS,
-//              TEST_IN + "models/;" + TEST_IN + "models/CH;" + TEST_IN + "models/V_D;" + TEST_IN + "models/refhb24");
-//      settings.setValue(Validator.SETTING_CONFIGFILE, TEST_IN + "models/DMAV_V1_0_Validierung.ini");
-//
-//      boolean valid = Validator.runValidation(TEST_IN+"FixpunkteAVKategorie3_LFP3/CH031151.xtf", settings);
 
-        
-        
-        
-        
+    }
+    
+    private List<LogEvent> getLogEvents(Path logFile) throws IOException {
+        List<LogEvent> logEvents = new ArrayList<>();
+        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        try {
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(Files.newInputStream(logFile));            
+            doc.getDocumentElement().normalize();
+
+            XPathFactory xPathFactory = XPathFactory.newInstance();
+            XPath xPath = xPathFactory.newXPath();
+
+            String expression = "//IliVErrors.ErrorLog.Error[Type='Error' or Type='Warnung']";  
+            XPathExpression xPathExpression = xPath.compile(expression);
+
+            NodeList nodeList = (NodeList) xPathExpression.evaluate(doc, javax.xml.xpath.XPathConstants.NODESET);
+
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                Node node = nodeList.item(i);
+
+                if (node.getNodeType() == Node.ELEMENT_NODE) {
+                    Element element = (Element) node;
+
+                    String typeValue = element.getElementsByTagName("Type").item(0).getTextContent();
+                    System.out.println("Type: " + typeValue);
+
+                    String message = element.getElementsByTagName("Message").item(0).getTextContent();
+                    System.out.println("Message: " + message);
+                    
+                    LogEvent logEvent = new LogEvent(LogEventType.valueOf(typeValue.toUpperCase()), message);
+                    System.out.println(logEvent);
+                    logEvents.add(logEvent);
+                }
+            }
+        } catch (ParserConfigurationException | SAXException | XPathExpressionException e) {
+            e.printStackTrace();
+            throw new IOException(e);
+        }        
+        return logEvents;
     }
 }

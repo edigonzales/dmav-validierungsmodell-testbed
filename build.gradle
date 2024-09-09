@@ -19,6 +19,8 @@ repositories {
 
 def ilivalidatorVersion = project.hasProperty('ilivalidatorVersion') ? project.ilivalidatorVersion : '1.14.3'
 def dataDirectory = project.hasProperty('data') ? project.data : './src/test/data'
+def config = project.hasProperty('config') ? project.config : './src/test/data/models/DMAV_V1_0_Validierung.ini'
+def modeldir = project.hasProperty('modeldir') ? project.modeldir : './src/test/data/models/'
 
 dependencies {
     testImplementation libs.junit.jupiter
@@ -37,6 +39,6 @@ tasks.named('test') {
 }
 
 run {
-    args = ["--data", dataDirectory]
+    args = ["--data", dataDirectory, "--config", config, "--modeldir", modeldir]
 }
 
