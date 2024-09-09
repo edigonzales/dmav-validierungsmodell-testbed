@@ -28,10 +28,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.Element;
 
 public class Testbed {
-
-    private static final String TEST_IN = "src/main/data/";
-    private static final String XTF_LOGFILE_NAME = "ilivalidator.log.xtf";
-
     public boolean run(String dataDirectory, String config, String modeldir) {
 
         // Alle XTF-Dateien, die nicht eine expected Log-Datei ist.
@@ -50,9 +46,7 @@ public class Testbed {
             e.printStackTrace();
             return false;
         }
-        
-        System.out.println(transferFiles);
-        
+
         for (Path transferFile : transferFiles) {
             String transferFileName = transferFile.getFileName().toString().substring(0, transferFile.getFileName().toString().length()-4);
             
@@ -97,7 +91,7 @@ public class Testbed {
                 return false;
             }
             
-            System.out.println(logFileExpected);
+            
             
             List<LogEvent> logEventsExpected = null;
             try {
@@ -142,13 +136,9 @@ public class Testbed {
                     Element element = (Element) node;
 
                     String typeValue = element.getElementsByTagName("Type").item(0).getTextContent();
-                    System.out.println("Type: " + typeValue);
-
                     String message = element.getElementsByTagName("Message").item(0).getTextContent();
-                    System.out.println("Message: " + message);
                     
                     LogEvent logEvent = new LogEvent(LogEventType.valueOf(typeValue.toUpperCase()), message);
-                    System.out.println(logEvent);
                     logEvents.add(logEvent);
                 }
             }
