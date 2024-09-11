@@ -95,7 +95,7 @@ public class Testbed {
             }
             
             // Die jeweiligen LogEvents (expected und test) auslesen
-            // und vergleichen (müssen indentisch sein).
+            // und vergleichen (müssen identisch sein).
             // Anschliessend in Logfile schreiben.
             boolean notEqualLogEvents = false;
             try {
