@@ -1,21 +1,15 @@
 package ch.interlis.testbed;
 
 import ch.ehi.basics.settings.Settings;
-import ch.interlis.iom_j.xtf.XtfReader;
 
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 
 import org.interlis2.validator.Validator;
 import org.slf4j.Logger;
@@ -37,7 +31,7 @@ import org.w3c.dom.Element;
 public class Testbed {
     private static Logger log = LoggerFactory.getLogger(Main.class);
 
-    public boolean run(String dataDirectory, String config, String modeldir, String logFileName) { 
+    public boolean run(String dataDirectory, String config, String modeldir) { 
         // Alle XTF-Dateien, die nicht eine expected Log-Datei ist.
         List<Path> transferFiles = new ArrayList<Path>();
         try (Stream<Path> walk = Files.walk(Paths.get(dataDirectory))) {
@@ -54,7 +48,7 @@ public class Testbed {
             e.printStackTrace();
             return false;
         }
-
+        
         for (Path transferFile : transferFiles) {
             String transferFileName = transferFile.getFileName().toString().substring(0, transferFile.getFileName().toString().length()-4);
             
@@ -64,7 +58,6 @@ public class Testbed {
             // XTF validieren
             String logFileNameTest = null;
             try {
-//                appendToLogFile(logFile, transferFile.getFileName().toString() + ":");
                 log.info(transferFile.getFileName().toString());
 
                 // Falls im gleichen Verzeichnis nicht eine Logdatei (mit den zu erwartenden Resulaten)
@@ -95,10 +88,7 @@ public class Testbed {
                 if (config != null) {
                     settings.setValue(Validator.SETTING_CONFIGFILE, config);                    
                 }
-
                 boolean valid = Validator.runValidation(transferFile.toFile().getAbsolutePath(), settings);
-
-                
             } catch (IOException e) {
                 e.printStackTrace();
                 return false;
@@ -107,35 +97,37 @@ public class Testbed {
             // Die jeweiligen LogEvents (expected und test) auslesen
             // und vergleichen (müssen indentisch sein).
             // Anschliessend in Logfile schreiben.
+            boolean notEqualLogEvents = false;
             try {
                 List<LogEvent> logEventsExpected = getLogEvents(logFileExpected);
                 List<LogEvent> logEventsTest = getLogEvents(Paths.get(logFileNameTest));
-                
                 {
                     List<LogEvent> differences = logEventsTest.stream()
                             .filter(element -> !logEventsExpected.contains(element))
                             .collect(Collectors.toList());
-
-//                    System.out.println("Test result does not correspond to the expected result (expected minus test): "
-//                            + differences);
-//                    appendToLogFile(logFile, "Test result does not correspond to the expected result (expected minus test): " + differences);
-
+                    if (differences.size() > 0) {
+                        log.info("Test result does not correspond to the expected result (expected minus test): " + differences);   
+                        notEqualLogEvents = true;
+                    }
                 }
                 
                 {
                     List<LogEvent> differences = logEventsExpected.stream()
                             .filter(element -> !logEventsTest.contains(element))
-                            .collect(Collectors.toList());
- 
-//                    System.out.println("Expected result does not correspond to the test result (test minus expected): " + differences);
-//                    appendToLogFile(logFile, "Expected result does not correspond to the test result (test minus expected): " + differences);
-                }
-                
+                            .collect(Collectors.toList());                    
+                    if (differences.size() > 0) {
+                        log.info("Expected result does not correspond to the test result (test minus expected): " + differences);
+                        notEqualLogEvents = true;
+                    }
+                }                
             } catch (IOException e) {
                 e.printStackTrace();
                 return false;
             }
-        }        
+            if (notEqualLogEvents) {
+                return false;
+            }
+        }       
         return true;
     }
     

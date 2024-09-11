@@ -40,7 +40,27 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+// Der Exit-Code der Ausführung soll sich durchgereicht werden, damit man in der Konsole
+// weiss, ob ein Fehler (Widerspruch zwischen Soll und Ist) gefunden wurde.
+/*
 run {
     args = ["--data", dataDirectory, "--config", config, "--modeldir", modeldir, "--Dorg.slf4j.simpleLogger.logFile", logFile]
 }
+*/
+
+task runProgram(type: JavaExec) {
+    main = 'ch.interlis.testbed.Main'
+    classpath = sourceSets.main.runtimeClasspath
+    args '--data', dataDirectory, '--config', config, '--modeldir', modeldir, '--Dorg.slf4j.simpleLogger.logFile', logFile
+    ignoreExitValue = true
+}
+
+runProgram.doLast {
+    def exitValue = runProgram.executionResult.get().exitValue
+    if (exitValue != 0) {
+        throw new GradleException("Program exited with code " + exitValue)
+    }
+}
+
+
 
