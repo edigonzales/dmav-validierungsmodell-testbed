@@ -3,16 +3,23 @@ package ch.interlis.testbed;
 import ch.ehi.basics.settings.Settings;
 import ch.interlis.iom_j.xtf.XtfReader;
 
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 import org.interlis2.validator.Validator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -28,8 +35,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.Element;
 
 public class Testbed {
-    public boolean run(String dataDirectory, String config, String modeldir) {
+    private static Logger log = LoggerFactory.getLogger(Main.class);
 
+    public boolean run(String dataDirectory, String config, String modeldir, String logFileName) { 
         // Alle XTF-Dateien, die nicht eine expected Log-Datei ist.
         List<Path> transferFiles = new ArrayList<Path>();
         try (Stream<Path> walk = Files.walk(Paths.get(dataDirectory))) {
@@ -52,16 +60,22 @@ public class Testbed {
             
             String logFileNameExpected = transferFileName + ".log.xtf";
             Path logFileExpected = transferFile.getParent().resolve(logFileNameExpected);
-            // Falls im gleichen Verzeichnis nicht eine Logdatei (mit den zu erwartenden Resulaten)
-            // liegt, wird das zu prüfende XTF ignoriert.
-            if (Files.notExists(logFileExpected)) {
-                continue;
-            }
             
             // XTF validieren
+            String logFileNameTest = null;
             try {
+//                appendToLogFile(logFile, transferFile.getFileName().toString() + ":");
+                log.info(transferFile.getFileName().toString());
+
+                // Falls im gleichen Verzeichnis nicht eine Logdatei (mit den zu erwartenden Resulaten)
+                // liegt, wird das zu prüfende XTF ignoriert.
+                if (Files.notExists(logFileExpected)) {
+                    log.info("No existing log file found. Ignoring test case: " + transferFile.getFileName().toString());
+                    continue;
+                }
+                
                 Path tmpdir = Files.createTempDirectory("testbed_");
-                String logFileNameTest = tmpdir.resolve(transferFileName + ".log.xtf").toFile().getAbsolutePath();
+                logFileNameTest = tmpdir.resolve(transferFileName + ".log.xtf").toFile().getAbsolutePath();
                 
                 Settings settings = new Settings();
                 settings.setValue(Validator.SETTING_XTFLOG, logFileNameTest);
@@ -73,7 +87,6 @@ public class Testbed {
                             .filter(Files::isDirectory)
                             .map(d -> {return d.toString();})
                             .collect(Collectors.toList());
-
                     settings.setValue(Validator.SETTING_ILIDIRS, String.join(";", directories));
                 } else {
                     settings.setValue(Validator.SETTING_ILIDIRS, Validator.SETTING_DEFAULT_ILIDIRS);
@@ -91,26 +104,39 @@ public class Testbed {
                 return false;
             }
             
-            
-            
-            List<LogEvent> logEventsExpected = null;
+            // Die jeweiligen LogEvents (expected und test) auslesen
+            // und vergleichen (müssen indentisch sein).
+            // Anschliessend in Logfile schreiben.
             try {
-                logEventsExpected = getLogEvents(logFileExpected);
+                List<LogEvent> logEventsExpected = getLogEvents(logFileExpected);
+                List<LogEvent> logEventsTest = getLogEvents(Paths.get(logFileNameTest));
+                
+                {
+                    List<LogEvent> differences = logEventsTest.stream()
+                            .filter(element -> !logEventsExpected.contains(element))
+                            .collect(Collectors.toList());
+
+//                    System.out.println("Test result does not correspond to the expected result (expected minus test): "
+//                            + differences);
+//                    appendToLogFile(logFile, "Test result does not correspond to the expected result (expected minus test): " + differences);
+
+                }
+                
+                {
+                    List<LogEvent> differences = logEventsExpected.stream()
+                            .filter(element -> !logEventsTest.contains(element))
+                            .collect(Collectors.toList());
+ 
+//                    System.out.println("Expected result does not correspond to the test result (test minus expected): " + differences);
+//                    appendToLogFile(logFile, "Expected result does not correspond to the test result (test minus expected): " + differences);
+                }
+                
             } catch (IOException e) {
                 e.printStackTrace();
                 return false;
             }
-        }
-
-        
+        }        
         return true;
-        
-        // Alle gefundenen XTF-Dateien prüfen, die im gleichen Verzeichnis
-        // auch eine (expected) Logdatei zum Vergleich liegen haben.
-        
-               
-        
-
     }
     
     private List<LogEvent> getLogEvents(Path logFile) throws IOException {

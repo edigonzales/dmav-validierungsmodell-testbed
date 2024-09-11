@@ -6,6 +6,7 @@ public class Main {
         String dataDirectory = null;
         String config = null;
         String modeldir = null;
+        String logFile = null;
 
         int argi=0;
         for (; argi<args.length; argi++){
@@ -20,6 +21,9 @@ public class Main {
             } else if (arg.equals("--modeldir")) {
                 argi++;
                 modeldir = args[argi];
+            } else if (arg.equals("--log")) {
+                argi++;
+                logFile = args[argi];
             }
         }
         
@@ -27,8 +31,9 @@ public class Main {
         System.out.println(dataDirectory);
         System.out.println(config);
         System.out.println(modeldir);
+        System.out.println(logFile);
 
         Testbed testbed = new Testbed();
-        testbed.run(dataDirectory, config, modeldir);
+        testbed.run(dataDirectory, config, modeldir, logFile);
     }
 }

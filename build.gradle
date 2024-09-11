@@ -16,11 +16,11 @@ repositories {
     maven { url "https://jars.interlis.ch" }
 }
 
-
 def ilivalidatorVersion = project.hasProperty('ilivalidatorVersion') ? project.ilivalidatorVersion : '1.14.3'
 def dataDirectory = project.hasProperty('data') ? project.data : './src/test/data'
 def config = project.hasProperty('config') ? project.config : './src/test/data/models/DMAV_V1_0_Validierung.ini'
 def modeldir = project.hasProperty('modeldir') ? project.modeldir : './src/test/data/models/'
+def logFile = project.hasProperty('log') ? project.log : './testbed.log'
 
 dependencies {
     testImplementation libs.junit.jupiter
@@ -28,6 +28,8 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     implementation "ch.interlis:ilivalidator:${ilivalidatorVersion}"
+    implementation 'org.slf4j:slf4j-api:1.7.36'
+    implementation 'org.slf4j:slf4j-simple:1.7.36'
 }
 
 application {
@@ -39,6 +41,6 @@ tasks.named('test') {
 }
 
 run {
-    args = ["--data", dataDirectory, "--config", config, "--modeldir", modeldir]
+    args = ["--data", dataDirectory, "--config", config, "--modeldir", modeldir, "--Dorg.slf4j.simpleLogger.logFile", logFile]
 }
 
