@@ -1,4 +1,4 @@
-# dmav-validierungsmodell-testbed
+# interlis-testsuite-runner
 
 ```
 ./gradlew runProgram -PilivalidatorVersion=1.14.3 -Pdata=./src/test/data -Pconfig=./src/test/data/models/DMAV_V1_0_Validierung.ini -PmodelDir=./src/test/data/models
