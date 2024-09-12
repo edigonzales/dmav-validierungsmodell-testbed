@@ -49,7 +49,12 @@ public class Testbed {
             return false;
         }
         
+        // Damit wird der Exit-Value gesteuert. Ist er false,
+        // wurden Fehler/Widersprüche entdeckt.
+        boolean notEqualLogEvents = false;
         for (Path transferFile : transferFiles) {
+            notEqualLogEvents = false;
+            
             String transferFileName = transferFile.getFileName().toString().substring(0, transferFile.getFileName().toString().length()-4);
             
             String logFileNameExpected = transferFileName + ".log.xtf";
@@ -97,7 +102,6 @@ public class Testbed {
             // Die jeweiligen LogEvents (expected und test) auslesen
             // und vergleichen (müssen identisch sein).
             // Anschliessend in Logfile schreiben.
-            boolean notEqualLogEvents = false;
             try {
                 List<LogEvent> logEventsExpected = getLogEvents(logFileExpected);
                 List<LogEvent> logEventsTest = getLogEvents(Paths.get(logFileNameTest));
@@ -124,10 +128,13 @@ public class Testbed {
                 e.printStackTrace();
                 return false;
             }
-            if (notEqualLogEvents) {
-                return false;
+            if (!notEqualLogEvents) {
+                log.info("...done.");
             }
-        }       
+        }
+        if (notEqualLogEvents) {
+            return false;
+        }
         return true;
     }
     
